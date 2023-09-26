@@ -1,6 +1,7 @@
 ﻿
 using blogpessoal.Model;
 using blogpessoal.Service;
+using blogpessoal.Service.Implements;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace blogpessoal.Controllers
     {
         private readonly IPostagemService _postagemService;
         private readonly IValidator<Postagem> _postagemValidator;
-        
+
 
         public PostagemController(
             IPostagemService postagemService,
@@ -27,7 +28,75 @@ namespace blogpessoal.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAll()
         {
-            return Ok (await _postagemService.GetAll());
+            return Ok(await _postagemService.GetAll());
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetById(long id)
+        {
+            var Resposta = await _postagemService.GetById(id);
+
+            if (Resposta is null)
+                return NotFound();
+
+            return Ok(Resposta);
+        }
+
+        [HttpGet("titulo/{titulo}")]
+        public async Task<ActionResult> GetByTitulo(string titulo)
+        {
+            return Ok(await _postagemService.GetByTitulo(titulo));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Create([FromBody] Postagem postagem)
+        {
+            var validarPostagem = await _postagemValidator.ValidateAsync(postagem);
+
+            if (!validarPostagem.IsValid)
+                return StatusCode(StatusCodes.Status400BadRequest, validarPostagem);
+
+            await _postagemService.Create(postagem);
+
+            return CreatedAtAction(nameof(GetById), new { id = postagem.Id }, postagem);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Update([FromBody] Postagem postagem)
+        {
+            if (postagem.Id == 0)
+                return BadRequest("Id da postagem é invalido!");
+            var validarPostagem = await _postagemValidator.ValidateAsync(postagem);
+
+            if (!validarPostagem.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, validarPostagem);
+            }
+            var Resposta = await _postagemService.Update(postagem);
+
+            if (Resposta is null)
+                return NotFound("Postagem não encontrada!");
+
+            return Ok(Resposta);
+
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(long id)
+        {
+            var BuscaPostagem = await _postagemService.GetById(id);
+
+            if (BuscaPostagem is null)
+                return NotFound("Postagem não encontrada!");
+
+            await _postagemService.Delete(BuscaPostagem);
+
+            return NoContent();
+        }
+
+
+
+
+
     }
 }
