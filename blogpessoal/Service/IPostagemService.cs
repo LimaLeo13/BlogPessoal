@@ -11,7 +11,7 @@ namespace blogpessoal.Service
         Task<IEnumerable<Postagem>> GetByTitulo(string titulo);
 
         Task<Postagem?> Create(Postagem postagem);
-        
+
         Task<Postagem?> Update(Postagem postagem);
 
         Task Delete(Postagem postagem);

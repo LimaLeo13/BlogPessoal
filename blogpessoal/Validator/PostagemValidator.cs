@@ -5,7 +5,7 @@ namespace blogpessoal.Validator
 {
     public class PostagemValidator : AbstractValidator<Postagem>
     {
-        public PostagemValidator() 
+        public PostagemValidator()
         {
             RuleFor(p => p.Titulo)
                 .NotEmpty()

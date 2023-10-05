@@ -1,20 +1,19 @@
 ﻿
 using blogpessoal.Model;
 using blogpessoal.Service;
-using blogpessoal.Service.Implements;
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace blogpessoal.Controllers
+namespace blogpessoal.Controller
 {
+    [Authorize]
     [Route("~/postagens")]
     [ApiController]
     public class PostagemController : ControllerBase
     {
         private readonly IPostagemService _postagemService;
         private readonly IValidator<Postagem> _postagemValidator;
-
 
         public PostagemController(
             IPostagemService postagemService,
@@ -37,7 +36,9 @@ namespace blogpessoal.Controllers
             var Resposta = await _postagemService.GetById(id);
 
             if (Resposta is null)
-                return NotFound();
+            {
+                return NotFound("Postagem não encontrada!");
+            }
 
             return Ok(Resposta);
         }
@@ -56,7 +57,10 @@ namespace blogpessoal.Controllers
             if (!validarPostagem.IsValid)
                 return StatusCode(StatusCodes.Status400BadRequest, validarPostagem);
 
-            await _postagemService.Create(postagem);
+            var Resposta = await _postagemService.Create(postagem);
+
+            if (Resposta is null)
+                return BadRequest("Tema não encontrado!");
 
             return CreatedAtAction(nameof(GetById), new { id = postagem.Id }, postagem);
         }
@@ -65,24 +69,24 @@ namespace blogpessoal.Controllers
         public async Task<ActionResult> Update([FromBody] Postagem postagem)
         {
             if (postagem.Id == 0)
-                return BadRequest("Id da postagem é invalido!");
+                return BadRequest("Id da Postagem é inválido!");
+
             var validarPostagem = await _postagemValidator.ValidateAsync(postagem);
 
             if (!validarPostagem.IsValid)
-            {
                 return StatusCode(StatusCodes.Status400BadRequest, validarPostagem);
-            }
+
             var Resposta = await _postagemService.Update(postagem);
 
             if (Resposta is null)
-                return NotFound("Postagem não encontrada!");
+                return NotFound("Postagem e/ou Tema não encontrados!");
 
             return Ok(Resposta);
 
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(int id)
         {
             var BuscaPostagem = await _postagemService.GetById(id);
 
@@ -92,11 +96,9 @@ namespace blogpessoal.Controllers
             await _postagemService.Delete(BuscaPostagem);
 
             return NoContent();
+
         }
 
-
-
-
-
     }
+
 }
