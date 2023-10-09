@@ -81,3 +81,7 @@ C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\obj\Debu
 C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\obj\Debug\net7.0\ref\blogpessoal.dll
 C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\bin\Debug\net7.0\BCrypt.Net-Core.dll
 C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\bin\Debug\net7.0\MicroElements.Swashbuckle.FluentValidation.dll
+C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\bin\Debug\net7.0\Scrutor.dll
+C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.dll
+C:\Users\user\OneDrive\Área de Trabalho\aspnet\blogpessoal\blogpessoal\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
