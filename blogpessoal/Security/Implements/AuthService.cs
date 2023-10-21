@@ -49,7 +49,7 @@ namespace blogpessoal.Security.Implements
 
             userLogin.Id = BuscaUsuario.Id;
             userLogin.Nome = BuscaUsuario.Nome;
-            userLogin.Foto = BuscaUsuario.Foto is not null ? FotoDefault : BuscaUsuario.Foto;
+            userLogin.Foto = BuscaUsuario.Foto is null ? FotoDefault : BuscaUsuario.Foto;
             userLogin.Token = "Bearer " + tokenHandler.WriteToken(token).ToString();
             userLogin.Senha = "";
 

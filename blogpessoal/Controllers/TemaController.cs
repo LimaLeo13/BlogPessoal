@@ -59,7 +59,7 @@ namespace blogpessoal.Controller
                 return StatusCode(StatusCodes.Status400BadRequest, validarTema);
 
             var Resposta = await _temaService.Create(tema);
-            return CreatedAtAction(nameof(GetById), new { id = Resposta.Id }, Resposta);
+            return CreatedAtAction(nameof(GetById), new { id = tema.Id }, tema);
         }
 
         [HttpPut]
