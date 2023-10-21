@@ -1,11 +1,10 @@
-
 using blogpessoal.Configuration;
 using blogpessoal.Data;
 using blogpessoal.Model;
-using blogpessoal.Security;
 using blogpessoal.Security.Implements;
-using blogpessoal.Service;
+using blogpessoal.Security;
 using blogpessoal.Service.Implements;
+using blogpessoal.Service;
 using blogpessoal.Validator;
 using FluentValidation;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -24,19 +23,15 @@ namespace blogpessoal
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers()
-                .AddNewtonsoftJson
-                (options =>
+                .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-                }
+                });
 
-                );
 
-            //Conexão com o Banco de Dados
-
+            // Conexão com o Banco de dados
             if (builder.Configuration["Enviroment:Start"] == "PROD")
             {
                 /* Conexão Remota (Nuvem) - PostgreSQL */
@@ -61,134 +56,132 @@ namespace blogpessoal
 
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(connectionString)
-
-
-
-            );
-
-                //Registrar a validação das Entidades
-                builder.Services.AddTransient<IValidator<Postagem>, PostagemValidator>();
-                builder.Services.AddTransient<IValidator<Tema>, TemaValidator>();
-                builder.Services.AddTransient<IValidator<User>, UserValidator>();
-
-                //Registrar as classes de serviço (Service)
-                builder.Services.AddScoped<IPostagemService, PostagemService>();
-                builder.Services.AddScoped<ITemaService, TemaService>();
-                builder.Services.AddScoped<IUserService, UserService>();
-                builder.Services.AddScoped<IAuthService, AuthService>();
-
-                //
-                builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                }).AddJwtBearer(options =>
-                {
-                    var key = Encoding.UTF8.GetBytes(Settings.Secret);
-                    options.SaveToken = true;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key)
-                    };
-                });
-
-                // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-                builder.Services.AddEndpointsApiExplorer();
-
-                // Configuração do Swagger
-                builder.Services.AddSwaggerGen(options =>
-                {
-                    // Informações do projeto e da pessoa desenvolvedora
-                    options.SwaggerDoc("v1", new OpenApiInfo
-                    {
-                        Version = "v1",
-                        Title = "Projeto Blog Pessoal",
-                        Description = "Projeto Blog Pessoal - ASP.NET Core 7.0",
-                        Contact = new OpenApiContact
-                        {
-                            Name = "Leonardo Lima",
-                            Email = "limaleo13@hotmail.com",
-                            Url = new Uri("https://github.com/LimaLeo13")
-                        },
-                        License = new OpenApiLicense
-                        {
-                            Name = "Github",
-                            Url = new Uri("https://github.com/LimaLeo13")
-                        }
-                    });
-
-                    // Configuração da Segurança do Swagger
-                    options.AddSecurityDefinition("JWT", new OpenApiSecurityScheme
-                    {
-                        In = ParameterLocation.Header,
-                        Description = "Digite um Token JWT válido",
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.Http,
-                        BearerFormat = "JWT",
-                        Scheme = "Bearer"
-                    });
-
-                    // Adicionar a indicação de endpoint protegido
-                    options.OperationFilter<AuthResponsesOperationFilter>();
-
-                });
-
-                //Adicionar o Fluent Validation no Swagger
-                builder.Services.AddFluentValidationRulesToSwagger();
-
-                //Configuração do CORS
-                builder.Services.AddCors(options =>
-                {
-                    options.AddPolicy(name: "MyPolicy",
-                        policy =>
-                        {
-                            policy.AllowAnyOrigin()
-                                  .AllowAnyMethod()
-                                  .AllowAnyHeader();
-                        });
-                });
-
-                var app = builder.Build();
-
-                //Criar o banco de dados e as tabelas
-
-                using (var scope = app.Services.CreateAsyncScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    dbContext.Database.EnsureCreated();
-                }
-
-                // Configure the HTTP request pipeline.
-
-                app.UseSwagger();
-
-                app.UseSwaggerUI();
-                // Swagger como Página Inicial (Home) na Nuvem
-                if (app.Environment.IsProduction())
-                {
-                    app.UseSwaggerUI(c =>
-                    {
-                        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog Pessoal - V1");
-                        c.RoutePrefix = string.Empty;
-                    });
-                }
-
-                // Inicializa o CORS
-                app.UseCors("MyPolicy");
-
-                app.UseAuthentication();
-
-                app.UseAuthorization();
-
-                app.MapControllers();
-
-                app.Run();
-
+                );
             }
+
+
+            // Registrar a Validação das Entidades
+            builder.Services.AddTransient<IValidator<Postagem>, PostagemValidator>();
+            builder.Services.AddTransient<IValidator<Tema>, TemaValidator>();
+            builder.Services.AddTransient<IValidator<User>, UserValidator>();
+
+            // Registrar as Classes de Serviço (Service)
+            builder.Services.AddScoped<IPostagemService, PostagemService>();
+            builder.Services.AddScoped<ITemaService, TemaService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+            // Validação do Token
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                var key = Encoding.UTF8.GetBytes(Settings.Secret);
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
+
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+
+            //Configuração do Swagger
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Informações do projeto e da pessoa desenvolvedora
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Projeto Blog Pessoal",
+                    Description = "Projeto Blog Pessoal - ASP.NET Core 7.0",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Leonardo Lima",
+                        Email = "limaleo13@hotmail.com",
+                        Url = new Uri("https://github.com/LimaLeo13")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Github",
+                        Url = new Uri("https://github.com/LimaLeo13")
+                    }
+                });
+
+                //Configuração de segurança no Swagger
+                options.AddSecurityDefinition("JWT", new OpenApiSecurityScheme()
+                {
+
+                    In = ParameterLocation.Header,
+                    Description = "Digite um Token JWT válido",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer"
+                });
+
+                //Adicionar a indicação de endpoint protegido
+                options.OperationFilter<AuthResponsesOperationFilter>();
+            });
+
+            //Adicionar o Fluent Validation no Swagger
+            builder.Services.AddFluentValidationRulesToSwagger();
+
+            // Configuração do CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: "MyPolicy",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                    });
+            });
+
+            var app = builder.Build();
+
+            // Criar o Banco de dados e as Tabelas
+            using (var scope = app.Services.CreateAsyncScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.EnsureCreated();
+            }
+
+
+            app.UseSwagger();
+
+            //Swagger como página inicial na nuvem
+            if (app.Environment.IsProduction())
+            {
+                app.UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog Pessoal - v1");
+                    options.RoutePrefix = string.Empty;
+                });
+            }
+
+            app.UseSwaggerUI();
+
+
+            // Inicializa o CORS
+            app.UseCors("MyPolicy");
+
+            app.UseAuthentication();
+
+            app.UseAuthorization();
+
+            app.MapControllers();
+
+            app.Run();
         }
     }
 }
