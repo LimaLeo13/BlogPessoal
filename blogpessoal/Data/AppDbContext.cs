@@ -31,7 +31,7 @@ namespace blogpessoal.Data
         public DbSet<Postagem> Postagens { get; set; } = null!;
         public DbSet<Tema> Temas { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
-        public object User { get; internal set; }
+        //public object User { get; internal set; }
 
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -45,7 +45,7 @@ namespace blogpessoal.Data
                 //Se uma propriedade da Classe Auditable estiver sendo criada. 
                 if (insertedEntry is Auditable auditableEntity)
                 {
-                    auditableEntity.Data = new DateTimeOffset(DateTime.Now, new TimeSpan(-3, 0, 0));
+                    auditableEntity.Data = new DateTimeOffset(DateTime.Now);
                 }
             }
 
